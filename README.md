@@ -182,10 +182,5 @@ Every board position is scored in **centipawns** (1 pawn = 100). The evaluation 
 
 ## 👤 Developer
 
-**Pranav** — Full-Stack Developer & AI Enthusiast
+**Pranav Y**
 
----
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
