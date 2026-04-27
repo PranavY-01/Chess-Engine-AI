@@ -13,6 +13,9 @@ interface SquareProps {
     isLastMove: boolean;
     isCheck: boolean;
     hasCapture: boolean;
+    isHintFrom?: boolean;
+    isHintTo?: boolean;
+    disabled?: boolean;
     onClick: () => void;
     children?: React.ReactNode;
 }
@@ -26,6 +29,9 @@ const Square: React.FC<SquareProps> = ({
     isLastMove,
     isCheck,
     hasCapture,
+    isHintFrom = false,
+    isHintTo = false,
+    disabled = false,
     onClick,
     children,
 }) => {
@@ -35,12 +41,15 @@ const Square: React.FC<SquareProps> = ({
         isSelected ? 'square-selected' : '',
         isLastMove ? 'square-last-move' : '',
         isCheck ? 'square-check' : '',
+        isHintFrom ? 'square-hint-from' : '',
+        isHintTo ? 'square-hint-to' : '',
+        disabled ? 'square-disabled' : '',
     ]
         .filter(Boolean)
         .join(' ');
 
     return (
-        <div className={classes} onClick={onClick} data-square={`${row}-${col}`}>
+        <div className={classes} onClick={disabled ? undefined : onClick} data-square={`${row}-${col}`}>
             {children}
             {isLegalMove && !hasCapture && (
                 <div className="legal-move-dot" />

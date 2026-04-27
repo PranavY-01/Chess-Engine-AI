@@ -1,7 +1,7 @@
 """
 Level 5 AI — Advanced.
-Alpha-beta with move ordering, killer moves, history heuristic,
-and quiescence search for a stronger playing style.
+Alpha-beta with improved move ordering (MVV-LVA), killer moves,
+history heuristic, quiescence search, and check extension.
 """
 import random
 from engine.move_generator import Move
@@ -11,17 +11,17 @@ from utils.constants import PIECE_VALUES
 
 
 class AdvancedAI:
-    """Advanced AI with move ordering, killer moves, and quiescence search."""
+    """Advanced AI — strongest algorithmic player."""
 
     def __init__(self, depth: int = 4):
         self.depth = depth
         self.validator = MoveValidator()
-        self.killer_moves = {}     # depth -> [move1, move2]
-        self.history_table = {}    # (start, end) -> score
+        self.killer_moves: dict[int, list[Move]] = {}
+        self.history_table: dict[tuple, int] = {}
         self.nodes_searched = 0
 
     def get_best_move(self, game_state) -> Move | None:
-        """Return the best move using advanced alpha-beta search."""
+        """Return the best move using alpha-beta search."""
         self.killer_moves = {}
         self.history_table = {}
         self.nodes_searched = 0
@@ -30,13 +30,12 @@ class AdvancedAI:
         if not legal_moves:
             return None
 
-        # Order moves at root
         legal_moves = self._order_moves(legal_moves, game_state, self.depth)
 
         color = game_state.turn
         is_maximizing = (color == 'w')
         best_score = float('-inf') if is_maximizing else float('inf')
-        best_moves = []
+        best_moves: list[Move] = []
         alpha = float('-inf')
         beta = float('inf')
 
@@ -65,17 +64,23 @@ class AdvancedAI:
 
     def _alpha_beta(self, game_state, depth: int, alpha: float, beta: float,
                     is_maximizing: bool) -> int:
-        """Alpha-beta search with move ordering and quiescence."""
+        """Alpha-beta with check extension, killer/history ordering, quiescence."""
         self.nodes_searched += 1
 
+        in_check = self.validator.is_in_check(game_state.board, game_state.turn)
+
+        # Check extension: extend by 1 ply when in check at leaf
+        if in_check and depth == 0:
+            depth = 1
+
         if depth == 0:
-            return self._quiescence(game_state, alpha, beta, is_maximizing, 4)
+            return self._quiescence(game_state, alpha, beta, is_maximizing, 2)
 
         legal_moves = self.validator.get_legal_moves(game_state)
         if not legal_moves:
-            if self.validator.is_in_check(game_state.board, game_state.turn):
-                return -100000 if is_maximizing else 100000
-            return 0
+            if in_check:
+                return -(100000 + depth) if is_maximizing else (100000 + depth)
+            return 0  # Stalemate
 
         legal_moves = self._order_moves(legal_moves, game_state, depth)
 
@@ -108,7 +113,7 @@ class AdvancedAI:
 
     def _quiescence(self, game_state, alpha: float, beta: float,
                     is_maximizing: bool, max_depth: int) -> int:
-        """Quiescence search: only search captures to avoid horizon effect."""
+        """Quiescence search: extend captures and promotions to avoid horizon effect."""
         stand_pat = evaluate(game_state)
 
         if max_depth == 0:
@@ -124,17 +129,24 @@ class AdvancedAI:
             beta = min(beta, stand_pat)
 
         legal_moves = self.validator.get_legal_moves(game_state)
-        # Only consider captures
-        captures = [m for m in legal_moves if m.captured_piece is not None]
 
-        if not captures:
+        # Only consider captures and promotions
+        tactical_moves = [
+            m for m in legal_moves
+            if m.captured_piece is not None or m.promotion_piece is not None
+        ]
+
+        if not tactical_moves:
             return stand_pat
 
-        # Order captures by MVV-LVA
-        captures.sort(key=lambda m: self._mvv_lva_score(m), reverse=True)
+        # Order by MVV-LVA
+        tactical_moves.sort(
+            key=lambda m: self._mvv_lva_score(m, game_state) + (8000 if m.promotion_piece else 0),
+            reverse=True,
+        )
 
         if is_maximizing:
-            for move in captures:
+            for move in tactical_moves:
                 gs_copy = game_state.copy()
                 gs_copy.make_move_no_validate(move)
                 score = self._quiescence(gs_copy, alpha, beta, False, max_depth - 1)
@@ -143,7 +155,7 @@ class AdvancedAI:
                     break
             return alpha
         else:
-            for move in captures:
+            for move in tactical_moves:
                 gs_copy = game_state.copy()
                 gs_copy.make_move_no_validate(move)
                 score = self._quiescence(gs_copy, alpha, beta, True, max_depth - 1)
@@ -153,40 +165,46 @@ class AdvancedAI:
             return beta
 
     def _order_moves(self, moves: list[Move], game_state, depth: int) -> list[Move]:
-        """Order moves for better pruning: captures first, then killers, then history."""
+        """Order moves: captures (MVV-LVA), promotions, killers, history heuristic."""
         scored_moves = []
+        killers = self.killer_moves.get(depth, [])
         for move in moves:
             score = 0
-            # 1. Captures scored by MVV-LVA (Most Valuable Victim - Least Valuable Attacker)
+            # 1. MVV-LVA for captures: 10*victim - attacker
             if move.captured_piece is not None:
-                score += 10000 + self._mvv_lva_score(move)
-            # 2. Killer moves
-            killers = self.killer_moves.get(depth, [])
+                score += 10000 + self._mvv_lva_score(move, game_state)
+            # 2. Promotions
+            if move.promotion_piece:
+                score += 9000
+            # 3. Killer moves
             if move in killers:
                 score += 5000
-            # 3. History heuristic
+            # 4. History heuristic
             key = (move.start_row, move.start_col, move.end_row, move.end_col)
             score += self.history_table.get(key, 0)
-            # 4. Promotions
-            if move.promotion_piece:
-                score += 8000
             scored_moves.append((score, move))
 
         scored_moves.sort(key=lambda x: x[0], reverse=True)
         return [m for _, m in scored_moves]
 
-    def _mvv_lva_score(self, move: Move) -> int:
-        """MVV-LVA: Most Valuable Victim - Least Valuable Attacker."""
+    def _mvv_lva_score(self, move: Move, game_state) -> int:
+        """MVV-LVA: 10 * victim_value - attacker_value.
+        PxQ = 10*900 - 100 = 8900 (excellent)
+        NxQ = 10*900 - 320 = 8680 (great)
+        QxQ = 10*900 - 900 = 8100 (acceptable)
+        QxP = 10*100 - 900 = 100  (bad trade, search last)
+        """
         if move.captured_piece is None:
             return 0
         victim_value = PIECE_VALUES.get(move.captured_piece[1], 0)
-        # We don't have the attacker piece stored, but we can infer from position
-        return victim_value
+        attacker = game_state.board.get_piece(move.start_row, move.start_col)
+        attacker_value = PIECE_VALUES.get(attacker[1], 0) if attacker else 0
+        return 10 * victim_value - attacker_value
 
     def _store_killer(self, move: Move, depth: int):
-        """Store a killer move (causes cutoff but isn't a capture)."""
+        """Store quiet moves that cause cutoffs as killer moves."""
         if move.captured_piece is not None:
-            return  # only store quiet moves as killers
+            return
         if depth not in self.killer_moves:
             self.killer_moves[depth] = []
         killers = self.killer_moves[depth]

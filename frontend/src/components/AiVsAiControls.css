@@ -1,0 +1,26 @@
+.aivai-controls {
+  margin-top: 12px;
+  background: var(--panel-bg);
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  padding: 12px;
+}
+.aivai-controls label {
+  display: block;
+  margin-bottom: 8px;
+}
+.aivai-controls input {
+  width: 100%;
+}
+.aivai-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+}
+.aivai-actions button {
+  padding: 8px 12px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-soft);
+  color: var(--text-main);
+  border-radius: 8px;
+}

@@ -54,8 +54,8 @@ class MinimaxAI:
         legal_moves = self.validator.get_legal_moves(game_state)
         if not legal_moves:
             if self.validator.is_in_check(game_state.board, game_state.turn):
-                # Checkmate: worst possible score
-                return -100000 if is_maximizing else 100000
+                # Checkmate: prefer faster mates (higher depth = found sooner)
+                return -(100000 + depth) if is_maximizing else (100000 + depth)
             return 0  # Stalemate
 
         if is_maximizing:

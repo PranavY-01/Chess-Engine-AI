@@ -1,0 +1,82 @@
+/* ============================================================
+   AlgorithmCard — Glass card
+   ============================================================ */
+.algorithm-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-base);
+  text-align: left;
+  width: 100%;
+  cursor: default;
+}
+
+.algorithm-card:hover {
+  border-color: var(--glass-border-hover);
+}
+
+.algorithm-card.selected {
+  border-color: var(--accent-primary);
+  box-shadow: var(--accent-glow);
+}
+
+.algorithm-card-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--accent, var(--accent-primary));
+  opacity: 0.7;
+}
+
+.algorithm-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.algorithm-avatar {
+  font-size: 1.6rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft);
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.algorithm-name {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.algorithm-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.algorithm-personality {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.algorithm-side {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-top: 8px;
+}

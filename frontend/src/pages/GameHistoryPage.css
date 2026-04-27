@@ -1,0 +1,202 @@
+/* ============================================================
+   GameHistoryPage
+   ============================================================ */
+.history-page {
+  animation: pageEnter var(--transition-morph) both;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+  padding-top: 12px;
+}
+
+.history-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.history-clear-btn {
+  padding: 8px 18px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 0.82rem;
+  transition: all var(--transition-fast);
+}
+
+.history-clear-btn:hover {
+  background: rgba(248, 113, 113, 0.2);
+  border-color: var(--danger);
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.history-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all var(--transition-base);
+}
+
+.history-card:hover {
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--glass-shadow), var(--glass-glow);
+}
+
+.history-card-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+  width: 100%;
+  text-align: left;
+}
+
+.history-card-main:hover {
+  background: rgba(124, 106, 247, 0.03);
+}
+
+.history-card-mode {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  color: var(--accent-primary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.history-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.history-card-matchup {
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-card-meta {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.history-card-result {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.history-card-result.win { background: var(--success-soft); color: var(--success); }
+.history-card-result.loss { background: var(--danger-soft); color: var(--danger); }
+.history-card-result.draw { background: var(--warning-soft); color: var(--warning); }
+
+.history-card-arrow {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  transition: transform var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.history-card-arrow.open {
+  transform: rotate(180deg);
+}
+
+/* Expanded section */
+.history-card-detail {
+  border-top: 1px solid var(--glass-border);
+  padding: 16px 20px;
+  animation: fadeInUp 0.25s ease both;
+}
+
+.history-detail-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.history-detail-moves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.history-detail-move {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  padding: 4px 8px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+}
+
+.history-detail-eval {
+  margin-top: 12px;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.history-detail-eval strong {
+  color: var(--text-primary);
+}
+
+/* Empty state */
+.history-empty {
+  text-align: center;
+  padding: 60px 32px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(var(--glass-blur));
+}
+
+.history-empty-icon {
+  font-size: 3rem;
+  opacity: 0.4;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.history-empty-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.history-empty-sub {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}

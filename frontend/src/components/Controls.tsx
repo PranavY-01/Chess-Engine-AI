@@ -1,14 +1,19 @@
 /**
- * Controls component — New Game, difficulty selector, game status display.
+ * Controls component with mode and demonstrator selectors.
  */
 import React from 'react';
-import type { AILevel, GameStatus } from '../types/chessTypes';
-import { AI_LEVEL_NAMES } from '../types/chessTypes';
+import type { GameStatus } from '../types/chessTypes';
+import type { AILevel } from '../config/demonstrators';
+import { DEMONSTRATOR_LIST } from '../config/demonstrators';
 import './Controls.css';
 
 interface ControlsProps {
-    aiLevel: AILevel;
-    onAILevelChange: (level: AILevel) => void;
+    mode: 'human-vs-ai' | 'ai-vs-ai';
+    onModeChange: (mode: 'human-vs-ai' | 'ai-vs-ai') => void;
+    whiteLevel: AILevel;
+    blackLevel: AILevel;
+    onWhiteLevelChange: (level: AILevel) => void;
+    onBlackLevelChange: (level: AILevel) => void;
     onNewGame: () => void;
     gameStatus: GameStatus;
     isLoading: boolean;
@@ -36,8 +41,12 @@ function statusMessage(status: GameStatus): string {
 }
 
 const Controls: React.FC<ControlsProps> = ({
-    aiLevel,
-    onAILevelChange,
+    mode,
+    onModeChange,
+    whiteLevel,
+    blackLevel,
+    onWhiteLevelChange,
+    onBlackLevelChange,
     onNewGame,
     gameStatus,
     isLoading,
@@ -68,21 +77,48 @@ const Controls: React.FC<ControlsProps> = ({
 
             {/* Difficulty Selector */}
             <div className="difficulty-section">
-                <label className="difficulty-label">AI Difficulty</label>
+                <label className="difficulty-label">Simulation Mode</label>
+                <div className="mode-buttons">
+                    <button className={mode === 'human-vs-ai' ? 'active' : ''} onClick={() => onModeChange('human-vs-ai')}>Human vs AI</button>
+                    <button className={mode === 'ai-vs-ai' ? 'active' : ''} onClick={() => onModeChange('ai-vs-ai')}>AI vs AI</button>
+                </div>
+            </div>
+
+            <div className="difficulty-section">
+                <label className="difficulty-label">White Demonstrator</label>
                 <div className="difficulty-buttons">
-                    {([1, 2, 3, 4, 5] as AILevel[]).map((level) => (
+                    {DEMONSTRATOR_LIST.map((cfg) => (
                         <button
-                            key={level}
-                            className={`difficulty-btn ${aiLevel === level ? 'active' : ''}`}
-                            onClick={() => onAILevelChange(level)}
-                            title={AI_LEVEL_NAMES[level]}
+                            key={`w-${cfg.id}`}
+                            className={`difficulty-btn ${whiteLevel === cfg.level ? 'active' : ''}`}
+                            style={{ borderColor: whiteLevel === cfg.level ? cfg.accent : undefined }}
+                            onClick={() => onWhiteLevelChange(cfg.level)}
                         >
-                            <span className="difficulty-num">{level}</span>
-                            <span className="difficulty-name">{AI_LEVEL_NAMES[level]}</span>
+                            <span className="difficulty-num">{cfg.avatar}</span>
+                            <span className="difficulty-name">{cfg.name}</span>
                         </button>
                     ))}
                 </div>
             </div>
+
+            {mode === 'ai-vs-ai' && (
+                <div className="difficulty-section">
+                    <label className="difficulty-label">Black Demonstrator</label>
+                    <div className="difficulty-buttons">
+                        {DEMONSTRATOR_LIST.map((cfg) => (
+                            <button
+                                key={`b-${cfg.id}`}
+                                className={`difficulty-btn ${blackLevel === cfg.level ? 'active' : ''}`}
+                                style={{ borderColor: blackLevel === cfg.level ? cfg.accent : undefined }}
+                                onClick={() => onBlackLevelChange(cfg.level)}
+                            >
+                                <span className="difficulty-num">{cfg.avatar}</span>
+                                <span className="difficulty-name">{cfg.name}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* New Game Button */}
             <button
@@ -90,7 +126,7 @@ const Controls: React.FC<ControlsProps> = ({
                 onClick={onNewGame}
                 disabled={isLoading}
             >
-                🎮 New Game
+                Start Session
             </button>
         </div>
     );

@@ -3,12 +3,17 @@ REST API routes for the Chess Engine.
 All chess logic is computed on the backend; the frontend only calls these endpoints.
 """
 import random
+import asyncio
 from fastapi import APIRouter, HTTPException
 
 from api.schemas import (
     GameStartRequest, GameStartResponse, GameStateResponse,
     MoveRequest, MoveResponse, AIMoveRequest, AIMoveResponse,
     TopMovesResponse, TopMoveItem, LegalMovesResponse, UndoRedoResponse,
+    ExplainRequest, ExplainResponse, BranchStartRequest, BranchAdvanceRequest,
+    BranchStateResponse, HintResponse, AiVsAiStartRequest, AiVsAiPauseRequest,
+    AiVsAiStepRequest, AiVsAiStateResponse, DemonstratorInfo,
+    EvaluationResponse, EndSessionResponse,
 )
 from engine.game_state import GameState
 from engine.move_validator import MoveValidator
@@ -17,7 +22,14 @@ from ai.greedy import GreedyAI
 from ai.minimax import MinimaxAI
 from ai.alphabeta import AlphaBetaAI
 from ai.advanced_ai import AdvancedAI
+from ai.evaluation import evaluate
 from analysis.move_suggester import MoveSuggester
+from reasoning.groq_client import GroqClient
+from reasoning.prompt_builder import build_explanation_prompt
+from reasoning.personality import get_personality
+from simulation.branch_engine import BranchEngine
+from simulation.ai_vs_ai import AiVsAiManager
+from utils.demonstrators import DEMONSTRATORS, ID_TO_LEVEL
 from utils.constants import FILE_TO_COL, RANK_TO_ROW, COL_TO_FILE, ROW_TO_RANK
 
 router = APIRouter()
@@ -28,6 +40,9 @@ router = APIRouter()
 game_state: GameState | None = None
 ai_level: int = 3
 validator = MoveValidator()
+branch_engine = BranchEngine()
+ai_vs_ai_manager = AiVsAiManager()
+groq_client = GroqClient()
 
 
 def _get_ai(level: int):
@@ -60,6 +75,10 @@ def _get_ai_move(gs: GameState, level: int) -> Move | None:
     return ai_engine.get_best_move(gs)
 
 
+async def _get_ai_move_async(gs: GameState, level: int) -> Move | None:
+    return await asyncio.to_thread(_get_ai_move, gs, level)
+
+
 def _square_to_coords(square: str) -> tuple[int, int]:
     """Convert algebraic notation (e.g., 'e4') to (row, col)."""
     if len(square) != 2:
@@ -76,6 +95,10 @@ def _coords_to_square(row: int, col: int) -> str:
     return COL_TO_FILE[col] + ROW_TO_RANK[row]
 
 
+def _material_balance(gs: GameState) -> int:
+    return int(evaluate(gs))
+
+
 def _get_last_move_info(gs: GameState) -> dict | None:
     """Get the last move as a dict with from/to squares."""
     if not gs.move_history:
@@ -90,6 +113,13 @@ def _get_last_move_info(gs: GameState) -> dict | None:
 def _is_check(gs: GameState) -> bool:
     """Check if the current side's king is in check."""
     return validator.is_in_check(gs.board, gs.turn)
+
+
+def _normalize_level_from_demonstrator(demonstrator_id: str) -> int:
+    level = ID_TO_LEVEL.get(demonstrator_id)
+    if level is None:
+        raise HTTPException(status_code=400, detail="Unknown demonstrator")
+    return level
 
 
 # ---------------------------------------------------------------------------
@@ -115,6 +145,20 @@ def start_game(request: GameStartRequest = GameStartRequest()):
     )
 
 
+@router.get("/demonstrators", response_model=list[DemonstratorInfo])
+def get_demonstrators():
+    return [
+        DemonstratorInfo(
+            id=cfg["id"],
+            name=cfg["name"],
+            emoji=cfg["emoji"],
+            accent=cfg["accent"],
+            algorithm=cfg["algorithm"],
+        )
+        for cfg in DEMONSTRATORS.values()
+    ]
+
+
 @router.get("/game/state", response_model=GameStateResponse)
 def get_game_state():
     """Get the current game state."""
@@ -132,7 +176,7 @@ def get_game_state():
 
 
 @router.post("/game/move", response_model=MoveResponse)
-def make_move(request: MoveRequest):
+async def make_move(request: MoveRequest):
     """Make a player move and optionally get AI response."""
     global game_state
 
@@ -183,7 +227,7 @@ def make_move(request: MoveRequest):
 
     # If game is still active, get AI response
     if status == 'active':
-        ai_move = _get_ai_move(game_state, ai_level)
+        ai_move = await _get_ai_move_async(game_state, ai_level)
         if ai_move:
             game_state.make_move(ai_move)
             ai_move_info = {
@@ -207,7 +251,7 @@ def make_move(request: MoveRequest):
 
 
 @router.post("/ai/move", response_model=AIMoveResponse)
-def ai_move(request: AIMoveRequest = AIMoveRequest()):
+async def ai_move(request: AIMoveRequest = AIMoveRequest()):
     """Get the AI to make a move."""
     global game_state
 
@@ -219,7 +263,7 @@ def ai_move(request: AIMoveRequest = AIMoveRequest()):
         raise HTTPException(status_code=400, detail=f"Game is over: {status}")
 
     level = request.level if request.level else ai_level
-    move = _get_ai_move(game_state, level)
+    move = await _get_ai_move_async(game_state, level)
 
     if move is None:
         raise HTTPException(status_code=400, detail="No legal moves available")
@@ -266,6 +310,27 @@ def get_top_moves():
     ]
 
     return TopMovesResponse(suggestions=items, turn=game_state.turn)
+
+
+@router.get("/analysis/hint", response_model=HintResponse)
+def get_hint():
+    if game_state is None:
+        raise HTTPException(status_code=400, detail="No game in progress.")
+
+    if game_state.get_game_status() != 'active':
+        raise HTTPException(status_code=400, detail="Game is not active.")
+
+    suggester = MoveSuggester(depth=3, top_n=1)
+    suggestions = suggester.get_suggestions(game_state)
+    if not suggestions:
+        raise HTTPException(status_code=400, detail="No hint available")
+
+    best = suggestions[0]
+    return HintResponse(
+        from_square=best['from'],
+        to_square=best['to'],
+        score=best['score'],
+    )
 
 
 @router.get("/game/legal-moves/{square}", response_model=LegalMovesResponse)
@@ -362,3 +427,151 @@ def set_difficulty(level: int):
         raise HTTPException(status_code=400, detail="AI level must be between 1 and 5")
     ai_level = level
     return {"message": f"AI difficulty set to Level {level}", "level": level}
+
+
+@router.post("/reasoning/explain", response_model=ExplainResponse)
+async def explain_move(request: ExplainRequest):
+    personality = get_personality(request.demonstrator_id)
+    name = DEMONSTRATORS.get(_normalize_level_from_demonstrator(request.demonstrator_id), {}).get(
+        "name", "Demonstrator"
+    )
+    prompt = build_explanation_prompt(
+        demonstrator_name=name,
+        personality=personality,
+        chosen_move=request.chosen_move,
+        alternatives=request.alternatives,
+        board_context=request.board_context,
+        branch_mode=request.branch_mode,
+    )
+    explanation = await groq_client.explain(prompt)
+    return ExplainResponse(explanation=explanation)
+
+
+@router.post("/reasoning/explain-branch", response_model=ExplainResponse)
+async def explain_branch_move(request: ExplainRequest):
+    branch_req = ExplainRequest(
+        demonstrator_id=request.demonstrator_id,
+        chosen_move=request.chosen_move,
+        alternatives=request.alternatives,
+        board_context=request.board_context,
+        branch_mode=True,
+    )
+    return await explain_move(branch_req)
+
+
+@router.post("/simulation/branch/start", response_model=BranchStateResponse)
+def start_branch(request: BranchStartRequest):
+    if game_state is None:
+        raise HTTPException(status_code=400, detail="No game in progress.")
+
+    try:
+        result = branch_engine.start_branch(
+            base_state=game_state,
+            from_square=request.from_square,
+            to_square=request.to_square,
+            rank=request.rank,
+            level=request.level,
+            get_ai_move_fn=_get_ai_move,
+        )
+        return BranchStateResponse(**result)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
+@router.post("/simulation/branch/advance", response_model=BranchStateResponse)
+async def advance_branch(request: BranchAdvanceRequest):
+    try:
+        result = await asyncio.to_thread(branch_engine.advance, request.branch_id)
+        return BranchStateResponse(**result)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@router.delete("/simulation/branch/{branch_id}")
+def end_branch(branch_id: str):
+    branch_engine.end(branch_id)
+    return {"message": "Branch ended"}
+
+
+@router.post("/simulation/ai-vs-ai/start", response_model=AiVsAiStateResponse)
+def start_ai_vs_ai(request: AiVsAiStartRequest):
+    if request.white_level not in DEMONSTRATORS or request.black_level not in DEMONSTRATORS:
+        raise HTTPException(status_code=400, detail="Invalid demonstrator level")
+    return AiVsAiStateResponse(**ai_vs_ai_manager.start(request.white_level, request.black_level))
+
+
+@router.post("/simulation/ai-vs-ai/pause", response_model=AiVsAiStateResponse)
+def pause_ai_vs_ai(request: AiVsAiPauseRequest):
+    try:
+        return AiVsAiStateResponse(**ai_vs_ai_manager.set_paused(request.session_id, request.paused))
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@router.post("/simulation/ai-vs-ai/step", response_model=AiVsAiStateResponse)
+async def step_ai_vs_ai(request: AiVsAiStepRequest):
+    try:
+        state = await asyncio.to_thread(ai_vs_ai_manager.step, request.session_id, _get_ai_move)
+        return AiVsAiStateResponse(**state)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@router.post("/simulation/ai-vs-ai/reset", response_model=AiVsAiStateResponse)
+def reset_ai_vs_ai(request: AiVsAiStepRequest):
+    try:
+        return AiVsAiStateResponse(**ai_vs_ai_manager.reset(request.session_id))
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@router.get("/simulation/ai-vs-ai/{session_id}", response_model=AiVsAiStateResponse)
+def get_ai_vs_ai_state(session_id: str):
+    try:
+        return AiVsAiStateResponse(**ai_vs_ai_manager.get(session_id))
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@router.get("/analysis/evaluation", response_model=EvaluationResponse)
+def get_evaluation():
+    """Get position evaluation for the accuracy meter."""
+    if game_state is None:
+        raise HTTPException(status_code=400, detail="No game in progress.")
+
+    raw_eval = evaluate(game_state)
+    # Convert centipawn evaluation to a win-probability-like percentage
+    # Using a sigmoid-like function: 50 + 50 * tanh(eval / 400)
+    import math
+    win_pct = 50 + 50 * math.tanh(raw_eval / 400)
+    return EvaluationResponse(
+        evaluation=round(raw_eval / 100, 2),
+        white_score=round(win_pct, 1),
+        black_score=round(100 - win_pct, 1),
+    )
+
+
+@router.post("/game/end-session", response_model=EndSessionResponse)
+def end_session():
+    """End the current game session and return final state for history storage."""
+    global game_state
+    if game_state is None:
+        raise HTTPException(status_code=400, detail="No game in progress.")
+
+    final_status = game_state.get_game_status()
+    final_moves = game_state.get_formatted_move_history()
+    final_eval = evaluate(game_state)
+    total_moves = len(final_moves)
+
+    # If game was still active when force-ended, mark as resigned
+    if final_status == "active":
+        final_status = "resigned"
+
+    game_state = None  # Clear the session
+
+    return EndSessionResponse(
+        status=final_status,
+        move_history=final_moves,
+        total_moves=total_moves,
+        final_evaluation=round(final_eval / 100, 2),
+    )

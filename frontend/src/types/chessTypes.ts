@@ -1,6 +1,7 @@
 /**
- * Chess type definitions for the frontend.
+ * Chess type definitions for the ChessAlgos frontend.
  */
+import type { AILevel } from '../config/demonstrators';
 
 /** A piece code like 'wK', 'bP', etc. or null for empty. */
 export type PieceCode = string | null;
@@ -55,17 +56,81 @@ export interface LegalMove {
   promotion: string | null;
 }
 
-/** AI difficulty levels. */
-export type AILevel = 1 | 2 | 3 | 4 | 5;
+export type { AILevel };
 
-/** Difficulty level descriptions. */
-export const AI_LEVEL_NAMES: Record<AILevel, string> = {
-  1: 'Random',
-  2: 'Greedy',
-  3: 'Minimax',
-  4: 'Alpha-Beta',
-  5: 'Advanced',
-};
+export interface HintMove {
+  from_square: string;
+  to_square: string;
+  score: number;
+}
+
+export interface BranchStateResponse {
+  branch_id: string;
+  board: Board;
+  turn: string;
+  status: string;
+  steps: Array<{ from: string; to: string; score: number | null; move: string }>;
+  progress: number;
+  max_half_moves: number;
+  base_rank: number;
+  suggestions: TopMove[];
+}
+
+export interface ExplainResponse {
+  explanation: string;
+}
+
+export interface AiVsAiState {
+  session_id: string;
+  board: Board;
+  turn: string;
+  status: string;
+  move_history: string[];
+  is_check: boolean;
+  paused: boolean;
+  white_level: AILevel;
+  black_level: AILevel;
+  last_move: { from: string; to: string } | null;
+  evaluation: number;
+  white_score: number;
+  black_score: number;
+}
+
+/** Evaluation response for accuracy meter */
+export interface EvaluationState {
+  evaluation: number;
+  white_score: number;
+  black_score: number;
+}
+
+/** Chat message for AI companion */
+export interface ChatMessage {
+  type: 'ai' | 'system' | 'user';
+  text: string;
+  move?: string;
+  timestamp: number;
+}
+
+/** Game history entry for localStorage persistence */
+export interface GameHistoryEntry {
+  id: string;
+  date: string;
+  mode: 'human-vs-ai' | 'ai-vs-ai';
+  whiteAlgorithm: string;
+  blackAlgorithm: string;
+  result: string;
+  moves: string[];
+  totalMoves: number;
+  finalEvaluation: number;
+}
+
+/** End session response */
+export interface EndSessionResponse {
+  status: string;
+  move_history: string[];
+  total_moves: number;
+  final_evaluation: number;
+}
 
 /** Unicode chess piece symbols. */
 export const PIECE_SYMBOLS: Record<string, string> = {

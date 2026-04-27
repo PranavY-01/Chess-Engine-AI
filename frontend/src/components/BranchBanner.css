@@ -1,0 +1,10 @@
+.branch-banner {
+  width: 100%;
+  background: #f59e0b;
+  color: #1f1300;
+  font-weight: 700;
+  text-align: center;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}

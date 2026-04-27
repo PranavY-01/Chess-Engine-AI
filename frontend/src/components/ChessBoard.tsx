@@ -15,6 +15,9 @@ interface ChessBoardProps {
     isCheck: boolean;
     kingSquare: string | null;
     turn: string;
+    readOnly?: boolean;
+    branchMode?: boolean;
+    hintMove?: { from: string; to: string } | null;
     onSquareClick: (row: number, col: number) => void;
 }
 
@@ -33,6 +36,9 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
     isCheck,
     kingSquare,
     turn,
+    readOnly = false,
+    branchMode = false,
+    hintMove = null,
     onSquareClick,
 }) => {
     const legalMoveSquares = new Set(legalMoves.map((m) => m.to));
@@ -46,7 +52,7 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
                 ))}
             </div>
 
-            <div className="chessboard">
+            <div className={`chessboard ${branchMode ? 'branch-board' : ''}`}>
                 {board.map((row, r) =>
                     row.map((piece, c) => {
                         const sq = squareFromCoords(r, c);
@@ -69,6 +75,9 @@ const ChessBoard: React.FC<ChessBoardProps> = ({
                                 isLastMove={isLastMoveSquare}
                                 isCheck={isCheckSquare}
                                 hasCapture={hasCapture}
+                                isHintFrom={hintMove?.from === sq}
+                                isHintTo={hintMove?.to === sq}
+                                disabled={readOnly}
                                 onClick={() => onSquareClick(r, c)}
                             >
                                 {piece && <Piece code={piece} />}
