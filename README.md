@@ -1,8 +1,8 @@
 <div align="center">
 
-# ♟️ Chess Engine AI
+# AI Algorithm Simulation Platform
 
-**A full-stack chess application with an intelligent AI opponent, built from scratch.**
+**A full-stack educational AI algorithm simulator using chess positions as a teaching surface.**
 
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
@@ -14,9 +14,9 @@
 
 ---
 
-## 📖 Overview
+## Overview
 
-Chess Engine AI is a complete chess platform featuring a **custom-built chess engine**, **5 AI difficulty levels**, and a **modern web interface**. The entire chess logic — move generation, validation, check/checkmate detection, special moves (castling, en passant, promotion) — is implemented from scratch in Python without relying on any external chess library.
+AI Algorithm Simulation Platform helps students learn how search algorithms think using interactive chess positions. It includes a custom chess engine, five demonstrator personalities, branch exploration, and Gemini-powered reasoning written for algorithm learning.
 
 ---
 

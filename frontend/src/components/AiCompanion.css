@@ -1,0 +1,297 @@
+/* ============================================================
+   AiCompanion — Floating Chat Widget (Bottom-Right)
+   ============================================================ */
+.ai-companion-toggle {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--accent-gradient);
+  color: #fff;
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 24px rgba(124, 106, 247, 0.4);
+  z-index: 1000;
+  transition: all var(--transition-base);
+  cursor: pointer;
+  border: none;
+}
+
+.ai-companion-toggle:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 30px rgba(124, 106, 247, 0.5);
+}
+
+.ai-companion-toggle.open {
+  transform: rotate(45deg) scale(1);
+}
+
+.ai-companion-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--success);
+  border: 2px solid var(--bg-primary);
+  animation: pulse-glow 2s infinite;
+}
+
+/* Panel */
+.ai-companion-panel {
+  position: fixed;
+  bottom: 88px;
+  right: 24px;
+  width: 380px;
+  max-height: 520px;
+  background: var(--glass-bg-solid);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--glass-shadow-lg);
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  /* Morph in/out */
+  animation: companionEnter var(--transition-morph) both;
+  transform-origin: bottom right;
+}
+
+@keyframes companionEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.85) translateY(20px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+
+.ai-companion-panel.closing {
+  animation: companionExit 0.3s ease-in forwards;
+}
+
+@keyframes companionExit {
+  to {
+    opacity: 0;
+    transform: scale(0.85) translateY(20px);
+    filter: blur(6px);
+  }
+}
+
+/* Header */
+.ai-companion-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.ai-companion-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.ai-companion-title {
+  flex: 1;
+}
+
+.ai-companion-title h4 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.ai-companion-title span {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.ai-companion-status {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 6px var(--success);
+}
+
+/* Messages */
+.ai-companion-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 200px;
+  max-height: 360px;
+}
+
+.ai-companion-msg {
+  max-width: 92%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  animation: fadeInUp 0.3s ease both;
+}
+
+.ai-companion-msg.ai {
+  align-self: flex-start;
+  background: var(--accent-soft);
+  border: 1px solid rgba(124, 106, 247, 0.15);
+  color: var(--text-primary);
+  border-bottom-left-radius: 4px;
+}
+
+.ai-companion-msg.system {
+  align-self: center;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  text-align: center;
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+}
+
+.ai-companion-msg.user {
+  align-self: flex-end;
+  background: var(--accent-gradient);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.ai-companion-msg .msg-move {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--accent-primary);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.ai-companion-msg.ai .msg-move {
+  color: var(--text-accent);
+}
+
+/* Typing indicator */
+.ai-companion-typing {
+  display: flex;
+  gap: 4px;
+  padding: 10px 14px;
+  align-self: flex-start;
+}
+
+.ai-companion-typing span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  animation: typingBounce 1.2s infinite;
+}
+
+.ai-companion-typing span:nth-child(2) { animation-delay: 0.15s; }
+.ai-companion-typing span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* Empty state */
+.ai-companion-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-muted);
+  padding: 32px;
+  text-align: center;
+}
+
+.ai-companion-empty-icon {
+  font-size: 2rem;
+  opacity: 0.5;
+}
+
+.ai-companion-empty p {
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+/* Actions bar */
+.ai-companion-actions {
+  padding: 10px 16px;
+  border-top: 1px solid var(--glass-border);
+  flex-shrink: 0;
+}
+
+.ai-companion-explain-btn {
+  width: 100%;
+  padding: 9px 16px;
+  border: 1px solid rgba(124, 106, 247, 0.25);
+  border-radius: var(--radius-md);
+  background: var(--accent-soft);
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all var(--transition-base);
+}
+
+.ai-companion-explain-btn:hover:not(:disabled) {
+  background: var(--accent-gradient);
+  color: #fff;
+  border-color: transparent;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(124, 106, 247, 0.3);
+}
+
+.ai-companion-explain-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.spinner-sm {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(124, 106, 247, 0.3);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@media (max-width: 600px) {
+  .ai-companion-panel {
+    width: calc(100vw - 32px);
+    right: 16px;
+    bottom: 80px;
+  }
+}

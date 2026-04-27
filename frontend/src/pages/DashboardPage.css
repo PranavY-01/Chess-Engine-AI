@@ -1,0 +1,264 @@
+/* ============================================================
+   DashboardPage — Landing / Home
+   ============================================================ */
+.dashboard-page {
+  animation: pageEnter var(--transition-morph) both;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.dashboard-hero {
+  text-align: center;
+  padding: 48px 0 40px;
+}
+
+.dashboard-hero-title {
+  font-size: 2.6rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--text-primary), var(--accent-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dashboard-hero-sub {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  max-width: 500px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Mode Cards */
+.dashboard-modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.dashboard-mode-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: 32px 28px;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-mode-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--accent-gradient);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.dashboard-mode-card:hover {
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--glass-shadow-lg), var(--glass-glow);
+  transform: translateY(-4px);
+}
+
+.dashboard-mode-card:hover::before {
+  opacity: 1;
+}
+
+.dashboard-mode-icon {
+  font-size: 2.2rem;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft);
+  border-radius: var(--radius-lg);
+}
+
+.dashboard-mode-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.dashboard-mode-desc {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.dashboard-mode-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent-primary);
+  margin-top: auto;
+  transition: gap var(--transition-fast);
+}
+
+.dashboard-mode-card:hover .dashboard-mode-action {
+  gap: 10px;
+}
+
+/* Stats */
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.dashboard-stat-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dashboard-stat-value {
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dashboard-stat-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+/* Recent Games */
+.dashboard-recent {
+  margin-bottom: 32px;
+}
+
+.dashboard-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+}
+
+.dashboard-recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dashboard-recent-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  transition: all var(--transition-fast);
+}
+
+.dashboard-recent-item:hover {
+  border-color: var(--glass-border-hover);
+  background: rgba(124, 106, 247, 0.04);
+}
+
+.dashboard-recent-mode {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  color: var(--accent-primary);
+  white-space: nowrap;
+}
+
+.dashboard-recent-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dashboard-recent-info strong {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.dashboard-recent-info span {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-left: 8px;
+}
+
+.dashboard-recent-result {
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.dashboard-recent-result.win {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.dashboard-recent-result.loss {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.dashboard-recent-result.draw {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.dashboard-empty-history {
+  text-align: center;
+  padding: 32px;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+}
+
+@media (max-width: 700px) {
+  .dashboard-modes {
+    grid-template-columns: 1fr;
+  }
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+  .dashboard-hero-title {
+    font-size: 1.8rem;
+  }
+}

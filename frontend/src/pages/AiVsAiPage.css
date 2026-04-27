@@ -1,0 +1,211 @@
+/* ============================================================
+   AiVsAiPage
+   ============================================================ */
+.avai-page {
+  animation: pageEnter var(--transition-morph) both;
+}
+
+/* Pre-session */
+.avai-setup {
+  max-width: 650px;
+  margin: 60px auto;
+  text-align: center;
+  animation: fadeInUp 0.5s ease both;
+}
+
+.avai-setup-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: 40px 36px;
+  box-shadow: var(--glass-shadow-lg);
+}
+
+.avai-setup-icon { font-size: 3rem; margin-bottom: 16px; display: block; }
+.avai-setup-title { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 8px; }
+.avai-setup-sub { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin-bottom: 28px; }
+
+.avai-setup-algos {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.avai-setup-vs {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+.avai-setup-algo-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  text-align: left;
+}
+
+.avai-setup-algo-side {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.avai-setup-algo-name {
+  font-size: 1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.avai-setup-algo-type {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Active layout */
+.avai-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.avai-status {
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+}
+
+.avai-status.game-over {
+  background: var(--accent-soft);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.avai-end-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 0.84rem;
+  transition: all var(--transition-fast);
+}
+
+.avai-end-btn:hover { background: rgba(248, 113, 113, 0.2); border-color: var(--danger); }
+
+.avai-game-layout {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  animation: fadeInUp 0.4s ease both;
+}
+
+.avai-side-col {
+  width: 260px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.avai-center-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.avai-meter-col {
+  flex-shrink: 0;
+}
+
+/* Speed controls */
+.avai-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(12px);
+}
+
+.avai-controls-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-right: 4px;
+}
+
+.avai-speed-btn {
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 600;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.avai-speed-btn.active {
+  border-color: var(--accent-primary);
+  background: var(--accent-soft);
+  color: var(--accent-primary);
+}
+
+.avai-pause-btn {
+  padding: 6px 14px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.82rem;
+  margin-left: auto;
+}
+
+.avai-pause-btn.playing {
+  background: var(--warning-soft);
+  color: var(--warning);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+}
+
+.avai-pause-btn.paused {
+  background: var(--success-soft);
+  color: var(--success);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+}
+
+.avai-error {
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  background: var(--danger-soft);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  color: var(--danger);
+  font-size: 0.84rem;
+}
+
+@media (max-width: 1100px) {
+  .avai-game-layout { flex-direction: column; align-items: center; }
+  .avai-side-col { width: 100%; max-width: 580px; }
+}

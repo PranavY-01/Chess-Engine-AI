@@ -1,0 +1,30 @@
+/* ============================================================
+   HintButton — Glass styled
+   ============================================================ */
+.hint-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all var(--transition-base);
+  width: 100%;
+  justify-content: center;
+}
+
+.hint-btn:hover:not(:disabled) {
+  border-color: var(--accent-primary);
+  background: var(--accent-soft);
+  color: var(--accent-primary);
+}
+
+.hint-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

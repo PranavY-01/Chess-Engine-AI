@@ -93,3 +93,97 @@ class UndoRedoResponse(BaseModel):
     is_check: bool
     last_move: Optional[dict] = None
     message: str
+
+
+class DemonstratorInfo(BaseModel):
+    id: str
+    name: str
+    emoji: str
+    accent: str
+    algorithm: str
+
+
+class ExplainRequest(BaseModel):
+    demonstrator_id: str
+    chosen_move: dict
+    alternatives: list[dict] = []
+    board_context: dict = {}
+    branch_mode: bool = False
+
+
+class ExplainResponse(BaseModel):
+    explanation: str
+
+
+class BranchStartRequest(BaseModel):
+    from_square: str
+    to_square: str
+    rank: int = 1
+    level: int = 5
+
+
+class BranchAdvanceRequest(BaseModel):
+    branch_id: str
+
+
+class BranchStateResponse(BaseModel):
+    branch_id: str
+    board: list[list[Optional[str]]]
+    turn: str
+    status: str
+    steps: list[dict]
+    progress: int
+    max_half_moves: int
+    base_rank: int
+    suggestions: list[dict]
+
+
+class HintResponse(BaseModel):
+    from_square: str
+    to_square: str
+    score: float
+
+
+class AiVsAiStartRequest(BaseModel):
+    white_level: int
+    black_level: int
+
+
+class AiVsAiPauseRequest(BaseModel):
+    session_id: str
+    paused: bool
+
+
+class AiVsAiStepRequest(BaseModel):
+    session_id: str
+
+
+class AiVsAiStateResponse(BaseModel):
+    session_id: str
+    board: list[list[Optional[str]]]
+    turn: str
+    status: str
+    move_history: list[str]
+    is_check: bool
+    paused: bool
+    white_level: int
+    black_level: int
+    last_move: Optional[dict] = None
+    evaluation: float = 0
+    white_score: float = 50
+    black_score: float = 50
+
+
+class EvaluationResponse(BaseModel):
+    """Position evaluation for the accuracy meter."""
+    evaluation: float        # evaluation in pawns (e.g. +0.16)
+    white_score: float       # white win percentage (0-100)
+    black_score: float       # black win percentage (0-100)
+
+
+class EndSessionResponse(BaseModel):
+    """Response when ending a game session."""
+    status: str
+    move_history: list[str]
+    total_moves: int
+    final_evaluation: float
